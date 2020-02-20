@@ -1,0 +1,47 @@
+version: '2'
+
+#volumes:
+#  nextcloud:
+#  db:
+
+services:
+
+  db:
+    container_name: maria-db
+    image: mariadb
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
+    restart: always
+    volumes:
+      - /home/dude/nextcloud-data/db:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpass
+      - MYSQL_PASSWORD=ncdbpassword
+      - MYSQL_DATABASE=ncdb
+      - MYSQL_USER=user
+
+  nextcloudkk:
+    container_name: nextcloud-kk
+    image: kongkrit/nextcloud-kk
+    ports:
+      - 8080:80
+    links:
+      - db
+    environment:
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - /home/dude/nextcloud-data/main:/var/www/html
+      - /home/dude/nextcloud-data/config:/var/www/html/config
+      - /home/dude/nextcloud-data/data:/var/www/html/data
+    restart: always
+
+# 0. check PUID and PGID to match the username
+# 1. docker-compose up -d
+# 2. surf to http://server:8080
+# 3. enter admin username/password
+# 4. click "Storage & database" - select MySQL/MariaDB
+#    - database user: user
+#    - database password: ncdbpassword
+#    - database name: ncdb
+#    - hostname: maria-db (container_name)
+# 5. uncheck "Install recommended apps" 
